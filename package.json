@@ -1,0 +1,23 @@
+{
+  "name": "threejs-starter-template",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "@tweenjs/tween.js": "^25.0.0",
+    "three": "latest"
+  },
+  "devDependencies": {
+    "@babel/core": "7.2.0",
+    "parcel-bundler": "^1.6.1"
+  },
+  "keywords": [
+    "starter",
+    "javascript",
+    "threejs"
+  ]
+}
