@@ -75,6 +75,10 @@ const setupLighting = () => {
 const createRods = () => {
   const rodGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 32);
   const rodMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.5, roughness: 0.2 });
+  
+  const plateGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32); // Geometry for the bottom plate
+  const plateMaterial = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5, roughness: 0.2 }); // Material for the bottom plate
+
   for (let i = 0; i < 3; i++) {
     const rod = new THREE.Mesh(rodGeometry, rodMaterial);
     rod.position.x = i * 2 - 2;
@@ -82,6 +86,14 @@ const createRods = () => {
     rod.receiveShadow = true;
     app.scene.add(rod);
     app.rods.push(rod);
+
+    // Create and position the bottom plate
+    const plate = new THREE.Mesh(plateGeometry, plateMaterial);
+    plate.position.x = rod.position.x;
+    plate.position.y = -1; // Position the plate at the base of the rod
+    plate.castShadow = true;
+    plate.receiveShadow = true;
+    app.scene.add(plate);
   }
 };
 
