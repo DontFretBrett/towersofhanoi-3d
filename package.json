@@ -18,7 +18,8 @@
   "devDependencies": {
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.22.20",
-    "@parcel/core": "^2.12.0"
+    "@parcel/core": "^2.12.0",
+    "parcel": "^2.12.0"
   },
   "browserslist": [
     ">0.2%",
