@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import TWEEN from '@tweenjs/tween.js';
 
 let app = {
   el: document.getElementById("app"),
@@ -187,30 +186,74 @@ const moveDiskToRod = (rodPositionX) => {
   // Check if move is valid
   if (!topDiskOnTargetRod || 
       topDiskOnTargetRod.geometry.parameters.radiusTop > selectedDisk.geometry.parameters.radiusTop) {
-    // Update disk position
-    selectedDisk.position.x = rodPositionX;
-    selectedDisk.position.y = -1.8 + disksOnTargetRod.length * 0.4;
     
-    // Reset material
+    // Revert the disk color before starting animation
     selectedDisk.material = selectedDisk.originalMaterial;
-    selectedDisk = null;
     
-    // Start timer on first move
-    if (app.moveCounter === 0) {
-      startTimer();
-    }
-    app.moveCounter++;
-    document.getElementById('move-counter').textContent = app.moveCounter;
+    const targetY = -1.8 + disksOnTargetRod.length * 0.4;
+    
+    // Animation parameters
+    const startX = selectedDisk.position.x;
+    const startY = selectedDisk.position.y;
+    const duration = 200;
+    const startTime = Date.now();
+    
+    // Animation function
+    function animateMove() {
+      const currentTime = Date.now();
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease in-out function
+      const easeProgress = progress < 0.5
+        ? 2 * progress * progress
+        : -1 + (4 - 2 * progress) * progress;
+      
+      // First move up, then across, then down
+      if (progress < 0.3) {
+        // Moving up
+        const upProgress = progress / 0.3;
+        selectedDisk.position.y = startY + (2 * upProgress);
+      } else if (progress < 0.7) {
+        // Moving across
+        const acrossProgress = (progress - 0.3) / 0.4;
+        selectedDisk.position.y = startY + 2;
+        selectedDisk.position.x = startX + (rodPositionX - startX) * acrossProgress;
+      } else {
+        // Moving down
+        const downProgress = (progress - 0.7) / 0.3;
+        selectedDisk.position.x = rodPositionX;
+        selectedDisk.position.y = (startY + 2) + (targetY - (startY + 2)) * downProgress;
+      }
+      
+      // Continue animation if not complete
+      if (progress < 1) {
+        requestAnimationFrame(animateMove);
+      } else {
+        // Animation complete
+        selectedDisk.position.x = rodPositionX;
+        selectedDisk.position.y = targetY;
+        selectedDisk = null;
+        
+        // Update move counter and check victory
+        if (app.moveCounter === 0) {
+          startTimer();
+        }
+        app.moveCounter++;
+        document.getElementById('move-counter').textContent = app.moveCounter;
 
-    // Check for victory (all disks on last rod)
-    const lastRodX = 4;
-    const disksOnLastRod = app.disks.filter(d => d.position.x === lastRodX);
-    if (disksOnLastRod.length === app.numDisks) {
-      stopTimer();
-      setTimeout(() => {
-        alert(`Congratulations! You solved it in ${app.moveCounter} moves and ${document.getElementById('timer').textContent}!`);
-      }, 100);
+        const disksOnLastRod = app.disks.filter(d => d.position.x === 4);
+        if (disksOnLastRod.length === app.numDisks) {
+          stopTimer();
+          setTimeout(() => {
+            alert(`Congratulations! You solved it in ${app.moveCounter} moves and ${document.getElementById('timer').textContent}!`);
+          }, 500);
+        }
+      }
     }
+    
+    // Start the animation
+    animateMove();
   }
 };
 
@@ -225,13 +268,6 @@ const solveHanoi = (n, fromRod, toRod, auxRod) => {
 // Animate the scene
 const animate = () => {
   requestAnimationFrame(animate);
-  if (app.moves.length > 0) {
-    const [fromRod, toRod] = app.moves.shift();
-    const disk = app.disks.find(d => d.position.x === fromRod * 2 - 2);
-    if (disk) {
-      disk.position.x = toRod * 2 - 2;
-    }
-  }
   app.renderer.render(app.scene, app.camera);
 };
 
