@@ -49,8 +49,11 @@ const setupScene = () => {
 
 // Setup camera
 const setupCamera = () => {
-  app.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  app.camera.position.z = 5;
+  app.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+  app.camera.position.z = 12;
+  app.camera.position.y = 4;
+  // Tilt the camera down to better see the play area
+  app.camera.lookAt(new THREE.Vector3(0, -1, 0));
 };
 
 // Setup lighting
@@ -81,15 +84,16 @@ const setupLighting = () => {
 
 // Create rods
 const createRods = () => {
-  const rodGeometry = new THREE.CylinderGeometry(0.15, 0.15, 2, 32); // Slightly thicker rod
+  const rodGeometry = new THREE.CylinderGeometry(0.25, 0.25, 3.5, 32);
   const rodMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.5, roughness: 0.2 });
   
-  const plateGeometry = new THREE.CylinderGeometry(0.8, 0.8, 0.1, 32); // Wider bottom plate
+  const plateGeometry = new THREE.CylinderGeometry(1.5, 1.5, 0.1, 32);
   const plateMaterial = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5, roughness: 0.2 });
 
   for (let i = 0; i < 3; i++) {
     const rod = new THREE.Mesh(rodGeometry, rodMaterial);
-    rod.position.x = i * 2 - 2;
+    rod.position.x = i * 4 - 4;
+    rod.position.y = -0.25;
     rod.castShadow = true;
     rod.receiveShadow = true;
     app.scene.add(rod);
@@ -97,7 +101,7 @@ const createRods = () => {
 
     const plate = new THREE.Mesh(plateGeometry, plateMaterial);
     plate.position.x = rod.position.x;
-    plate.position.y = -1;
+    plate.position.y = -2;
     plate.castShadow = true;
     plate.receiveShadow = true;
     app.scene.add(plate);
@@ -107,21 +111,21 @@ const createRods = () => {
 // Create disks
 const createDisks = () => {
   const diskColors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff];
-  const maxRadius = 0.7;  // Slightly smaller than plate
-  const minRadius = 0.25; // Minimum disk size
+  const maxRadius = 1.4;
+  const minRadius = 0.5;
   const radiusStep = (maxRadius - minRadius) / (app.numDisks - 1);
   
   for (let i = 0; i < app.numDisks; i++) {
     const radius = maxRadius - (i * radiusStep);
-    const diskGeometry = new THREE.CylinderGeometry(radius, radius, 0.1, 32);
+    const diskGeometry = new THREE.CylinderGeometry(radius, radius, 0.3, 32);
     const diskMaterial = new THREE.MeshStandardMaterial({ 
       color: diskColors[i % diskColors.length], 
       metalness: 0.3, 
       roughness: 0.5 
     });
     const disk = new THREE.Mesh(diskGeometry, diskMaterial);
-    disk.position.y = -0.9 + i * 0.1;
-    disk.position.x = -2;
+    disk.position.y = -1.8 + i * 0.4;
+    disk.position.x = -4;
     disk.castShadow = true;
     disk.receiveShadow = true;
     app.scene.add(disk);
@@ -135,7 +139,7 @@ const setupEventListeners = () => {
     const rodNumber = parseInt(event.key);
     
     if (rodNumber >= 1 && rodNumber <= 3) {
-      const rodPositionX = (rodNumber - 1) * 2 - 2;
+      const rodPositionX = (rodNumber - 1) * 4 - 4;
       
       if (!selectedDisk) {
         // Select top disk from the clicked rod
@@ -163,6 +167,16 @@ const setupEventListeners = () => {
       }
     }
   });
+
+  // Add window resize handler
+  window.addEventListener('resize', () => {
+    // Update camera aspect ratio
+    app.camera.aspect = window.innerWidth / window.innerHeight;
+    app.camera.updateProjectionMatrix();
+    
+    // Update renderer size
+    app.renderer.setSize(window.innerWidth, window.innerHeight);
+  });
 };
 
 // Helper function to move disk
@@ -175,7 +189,7 @@ const moveDiskToRod = (rodPositionX) => {
       topDiskOnTargetRod.geometry.parameters.radiusTop > selectedDisk.geometry.parameters.radiusTop) {
     // Update disk position
     selectedDisk.position.x = rodPositionX;
-    selectedDisk.position.y = -0.9 + disksOnTargetRod.length * 0.1;
+    selectedDisk.position.y = -1.8 + disksOnTargetRod.length * 0.4;
     
     // Reset material
     selectedDisk.material = selectedDisk.originalMaterial;
@@ -189,7 +203,7 @@ const moveDiskToRod = (rodPositionX) => {
     document.getElementById('move-counter').textContent = app.moveCounter;
 
     // Check for victory (all disks on last rod)
-    const lastRodX = 2; // x position of the third rod
+    const lastRodX = 4;
     const disksOnLastRod = app.disks.filter(d => d.position.x === lastRodX);
     if (disksOnLastRod.length === app.numDisks) {
       stopTimer();
