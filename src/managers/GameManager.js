@@ -1,6 +1,7 @@
 import { Rod } from '../components/Rod';
 import { Disk } from '../components/Disk';
 import { DISK_COLORS, DISK_CONFIG } from '../constants/GameConfig';
+import { Table } from '../components/Table';
 
 export class GameManager {
   constructor(scene) {
@@ -18,6 +19,10 @@ export class GameManager {
   }
 
   init() {
+    // Create and add table first
+    const table = new Table();
+    this.scene.add(table.getMesh());
+    
     this.createRods();
     this.createDisks();
   }

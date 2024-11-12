@@ -10,7 +10,7 @@ export class Rod {
       roughness: 0.5
     });
     this.base = new THREE.Mesh(baseGeometry, baseMaterial);
-    this.base.position.set(position.x, 0.1, position.z);
+    this.base.position.set(position.x, 0.25, position.z);
     this.base.receiveShadow = true;
 
     // Create rod
