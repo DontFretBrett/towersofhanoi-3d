@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import TWEEN from '@tweenjs/tween.js';
 
 let app = {
   el: document.getElementById("app"),
@@ -7,7 +8,14 @@ let app = {
   camera: null,
   rods: [],
   disks: [],
-  moves: []
+  moves: [],
+  moveCounter: 0,
+  numDisks: 3, // Default number of disks
+  timer: {
+    startTime: null,
+    interval: null,
+    isRunning: false
+  }
 };
 
 let selectedDisk = null;
@@ -22,7 +30,7 @@ const init = () => {
   createRods();
   createDisks();
   setupEventListeners();
-  solveHanoi(3, 0, 2, 1);
+  setupUIListeners();
   animate();
 };
 
@@ -73,11 +81,11 @@ const setupLighting = () => {
 
 // Create rods
 const createRods = () => {
-  const rodGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 32);
+  const rodGeometry = new THREE.CylinderGeometry(0.15, 0.15, 2, 32); // Slightly thicker rod
   const rodMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.5, roughness: 0.2 });
   
-  const plateGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32); // Geometry for the bottom plate
-  const plateMaterial = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5, roughness: 0.2 }); // Material for the bottom plate
+  const plateGeometry = new THREE.CylinderGeometry(0.8, 0.8, 0.1, 32); // Wider bottom plate
+  const plateMaterial = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5, roughness: 0.2 });
 
   for (let i = 0; i < 3; i++) {
     const rod = new THREE.Mesh(rodGeometry, rodMaterial);
@@ -87,10 +95,9 @@ const createRods = () => {
     app.scene.add(rod);
     app.rods.push(rod);
 
-    // Create and position the bottom plate
     const plate = new THREE.Mesh(plateGeometry, plateMaterial);
     plate.position.x = rod.position.x;
-    plate.position.y = -1; // Position the plate at the base of the rod
+    plate.position.y = -1;
     plate.castShadow = true;
     plate.receiveShadow = true;
     app.scene.add(plate);
@@ -100,9 +107,18 @@ const createRods = () => {
 // Create disks
 const createDisks = () => {
   const diskColors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff];
-  for (let i = 0; i < 3; i++) {
-    const diskGeometry = new THREE.CylinderGeometry(0.5 - i * 0.1, 0.5 - i * 0.1, 0.1, 32);
-    const diskMaterial = new THREE.MeshStandardMaterial({ color: diskColors[i % diskColors.length], metalness: 0.3, roughness: 0.5 });
+  const maxRadius = 0.7;  // Slightly smaller than plate
+  const minRadius = 0.25; // Minimum disk size
+  const radiusStep = (maxRadius - minRadius) / (app.numDisks - 1);
+  
+  for (let i = 0; i < app.numDisks; i++) {
+    const radius = maxRadius - (i * radiusStep);
+    const diskGeometry = new THREE.CylinderGeometry(radius, radius, 0.1, 32);
+    const diskMaterial = new THREE.MeshStandardMaterial({ 
+      color: diskColors[i % diskColors.length], 
+      metalness: 0.3, 
+      roughness: 0.5 
+    });
     const disk = new THREE.Mesh(diskGeometry, diskMaterial);
     disk.position.y = -0.9 + i * 0.1;
     disk.position.x = -2;
@@ -115,83 +131,72 @@ const createDisks = () => {
 
 // Setup event listeners
 const setupEventListeners = () => {
-  document.addEventListener('mousedown', onDocumentMouseDown, false);
-  document.addEventListener('keydown', onDocumentKeyDown, false);
-};
-
-// Handle mouse down events
-const onDocumentMouseDown = (event) => {
-  event.preventDefault();
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(mouse, app.camera);
-
-  const intersects = raycaster.intersectObjects(app.rods.concat(app.disks));
-
-  if (intersects.length > 0) {
-    const object = intersects[0].object;
-    handleObjectSelection(object);
-  }
-};
-
-// Handle key down events
-const onDocumentKeyDown = (event) => {
-  const key = event.key;
-  if (key >= '1' && key <= '3') {
-    const rodIndex = parseInt(key) - 1;
-    handleRodSelection(rodIndex);
-  }
-};
-
-// Handle object selection
-const handleObjectSelection = (object) => {
-  if (app.rods.includes(object)) {
-    const rodIndex = app.rods.indexOf(object);
-    handleRodSelection(rodIndex);
-  }
-};
-
-// Handle rod selection
-const handleRodSelection = (rodIndex) => {
-  const rodPositionX = rodIndex * 2 - 2;
-
-  if (selectedDisk) {
-    if (selectedDisk.position.x === rodPositionX) {
-      // Unselect the disk if the same rod is selected again
-      selectedDisk.material = selectedDisk.originalMaterial;
-      selectedDisk = null;
-    } else {
-      // Move the selected disk to the new rod if the move is valid
-      moveDiskToRod(rodPositionX);
+  window.addEventListener('keydown', (event) => {
+    const rodNumber = parseInt(event.key);
+    
+    if (rodNumber >= 1 && rodNumber <= 3) {
+      const rodPositionX = (rodNumber - 1) * 2 - 2;
+      
+      if (!selectedDisk) {
+        // Select top disk from the clicked rod
+        const disksOnRod = app.disks.filter(d => d.position.x === rodPositionX);
+        if (disksOnRod.length > 0) {
+          selectedDisk = disksOnRod.sort((a, b) => b.position.y - a.position.y)[0];
+          selectedDisk.originalMaterial = selectedDisk.material;
+          selectedDisk.material = new THREE.MeshStandardMaterial({ 
+            color: 0xffff00,
+            metalness: 0.3,
+            roughness: 0.5,
+            emissive: 0xffff00,
+            emissiveIntensity: 0.2
+          });
+        }
+      } else {
+        // If clicking the same rod, unselect the disk
+        if (selectedDisk.position.x === rodPositionX) {
+          selectedDisk.material = selectedDisk.originalMaterial;
+          selectedDisk = null;
+        } else {
+          // Otherwise, try to move the disk
+          moveDiskToRod(rodPositionX);
+        }
+      }
     }
-  } else {
-    // Select the top disk from the specified rod
-    selectTopDiskOnRod(rodPositionX);
-  }
+  });
 };
 
-// Move disk to rod
+// Helper function to move disk
 const moveDiskToRod = (rodPositionX) => {
   const disksOnTargetRod = app.disks.filter(d => d.position.x === rodPositionX);
   const topDiskOnTargetRod = disksOnTargetRod.sort((a, b) => b.position.y - a.position.y)[0];
-  if (!topDiskOnTargetRod || topDiskOnTargetRod.geometry.parameters.radiusTop > selectedDisk.geometry.parameters.radiusTop) {
+  
+  // Check if move is valid
+  if (!topDiskOnTargetRod || 
+      topDiskOnTargetRod.geometry.parameters.radiusTop > selectedDisk.geometry.parameters.radiusTop) {
+    // Update disk position
     selectedDisk.position.x = rodPositionX;
     selectedDisk.position.y = -0.9 + disksOnTargetRod.length * 0.1;
+    
+    // Reset material
     selectedDisk.material = selectedDisk.originalMaterial;
     selectedDisk = null;
-  }
-};
+    
+    // Start timer on first move
+    if (app.moveCounter === 0) {
+      startTimer();
+    }
+    app.moveCounter++;
+    document.getElementById('move-counter').textContent = app.moveCounter;
 
-// Select top disk on rod
-const selectTopDiskOnRod = (rodPositionX) => {
-  const topDiskOnRod = app.disks.filter(d => d.position.x === rodPositionX).sort((a, b) => b.position.y - a.position.y)[0];
-  if (topDiskOnRod) {
-    selectedDisk = topDiskOnRod;
-    selectedDisk.originalMaterial = selectedDisk.material;
-    selectedDisk.material = highlightMaterial;
+    // Check for victory (all disks on last rod)
+    const lastRodX = 2; // x position of the third rod
+    const disksOnLastRod = app.disks.filter(d => d.position.x === lastRodX);
+    if (disksOnLastRod.length === app.numDisks) {
+      stopTimer();
+      setTimeout(() => {
+        alert(`Congratulations! You solved it in ${app.moveCounter} moves and ${document.getElementById('timer').textContent}!`);
+      }, 100);
+    }
   }
 };
 
@@ -214,6 +219,68 @@ const animate = () => {
     }
   }
   app.renderer.render(app.scene, app.camera);
+};
+
+// Add this new function
+const setupUIListeners = () => {
+  document.getElementById('reset').addEventListener('click', resetGame);
+  document.getElementById('difficulty').addEventListener('change', (e) => {
+    app.numDisks = parseInt(e.target.value);
+    resetGame();
+  });
+};
+
+// Add reset game function
+const resetGame = () => {
+  // Remove existing disks from scene and array
+  while (app.disks.length > 0) {
+    const disk = app.disks.pop();
+    app.scene.remove(disk);
+    disk.geometry.dispose();
+    disk.material.dispose();
+  }
+  
+  // Reset move counter
+  app.moveCounter = 0;
+  document.getElementById('move-counter').textContent = '0';
+  
+  // Reset selected disk if any
+  if (selectedDisk) {
+    selectedDisk.material = selectedDisk.originalMaterial;
+    selectedDisk = null;
+  }
+  
+  // Create new disks
+  createDisks();
+  
+  // Reset timer
+  stopTimer();
+  app.timer.startTime = null;
+  document.getElementById('timer').textContent = '00:00';
+};
+
+// Add timer functions
+const startTimer = () => {
+  if (!app.timer.isRunning) {
+    app.timer.startTime = Date.now();
+    app.timer.isRunning = true;
+    app.timer.interval = setInterval(updateTimer, 1000);
+  }
+};
+
+const stopTimer = () => {
+  if (app.timer.isRunning) {
+    clearInterval(app.timer.interval);
+    app.timer.isRunning = false;
+  }
+};
+
+const updateTimer = () => {
+  const currentTime = Date.now();
+  const elapsedTime = Math.floor((currentTime - app.timer.startTime) / 1000);
+  const minutes = Math.floor(elapsedTime / 60).toString().padStart(2, '0');
+  const seconds = (elapsedTime % 60).toString().padStart(2, '0');
+  document.getElementById('timer').textContent = `${minutes}:${seconds}`;
 };
 
 init();
