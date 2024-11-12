@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.html",
+  "type": "module",
   "scripts": {
     "start": "parcel index.html --open",
     "build": "parcel build index.html"
@@ -12,9 +13,16 @@
     "three": "latest"
   },
   "devDependencies": {
-    "@babel/core": "7.2.0",
-    "parcel-bundler": "^1.6.1"
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.22.20",
+    "parcel-bundler": "^1.12.5"
   },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
   "keywords": [
     "starter",
     "javascript",
