@@ -17,8 +17,7 @@
   "devDependencies": {
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.22.20",
-    "parcel-bundler": "^1.12.5",
-    "parcel-plugin-static-files-copy": "^2.6.0"
+    "parcel-bundler": "^1.12.5"
   },
   "browserslist": [
     ">0.2%",
@@ -32,7 +31,7 @@
     "threejs"
   ],
   "staticFiles": {
-    "staticPath": "public",
-    "staticOutDir": "dist"
+    "staticPath": ["public"],
+    "watcherGlob": "**"
   }
 }
