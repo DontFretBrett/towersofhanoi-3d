@@ -1,74 +1,105 @@
 import * as THREE from 'three';
-import { CAMERA_CONFIG } from '../constants/GameConfig';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Debug } from '../utils/Debug';
+import { CAMERA_CONFIG, LIGHT_CONFIG } from '../constants/GameConfig';
 
 export class Scene {
-  constructor(element) {
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(
-      CAMERA_CONFIG.fov,
-      window.innerWidth / window.innerHeight,
-      CAMERA_CONFIG.near,
-      CAMERA_CONFIG.far
-    );
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.element = element;
-  }
+    constructor(element) {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(
+            CAMERA_CONFIG.fov,
+            window.innerWidth / window.innerHeight,
+            CAMERA_CONFIG.near,
+            CAMERA_CONFIG.far
+        );
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.element = element;
+        this.controls = null;
+        this.debug = null;
+        this.directionalLight = null;
+    }
 
-  init() {
-    // Setup renderer
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.domElement.style.position = 'fixed';
-    this.renderer.domElement.style.zIndex = '1';
-    
-    // Prevent canvas from capturing all events
-    this.renderer.domElement.style.pointerEvents = 'none';
-    
-    this.element.appendChild(this.renderer.domElement);
+    init() {
+        // Setup renderer
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.element.appendChild(this.renderer.domElement);
 
-    // Setup camera
-    this.camera.position.set(
-      CAMERA_CONFIG.position.x,
-      CAMERA_CONFIG.position.y,
-      CAMERA_CONFIG.position.z
-    );
-    this.camera.lookAt(new THREE.Vector3(0, -1, 0));
+        // Setup camera
+        this.camera.position.set(
+            CAMERA_CONFIG.position.x,
+            CAMERA_CONFIG.position.y,
+            CAMERA_CONFIG.position.z
+        );
+        this.camera.lookAt(
+            CAMERA_CONFIG.lookAt.x,
+            CAMERA_CONFIG.lookAt.y,
+            CAMERA_CONFIG.lookAt.z
+        );
 
-    // Setup lighting
-    this.setupLighting();
+        // Setup OrbitControls
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        this.controls.screenSpacePanning = false;
+        this.controls.minDistance = 5;
+        this.controls.maxDistance = 30;
+        this.controls.maxPolarAngle = Math.PI / 2;
 
-    // Handle window resize
-    window.addEventListener('resize', () => this.handleResize());
-  }
+        // Setup lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        this.scene.add(ambientLight);
 
-  setupLighting() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    this.scene.add(ambientLight);
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        this.directionalLight.position.set(
+            LIGHT_CONFIG.position.x,
+            LIGHT_CONFIG.position.y,
+            LIGHT_CONFIG.position.z
+        );
+        this.directionalLight.castShadow = true;
+        this.scene.add(this.directionalLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 20, 10);
-    directionalLight.castShadow = true;
-    this.scene.add(directionalLight);
-  }
+        // Add debug panel with controls reference
+        this.debug = new Debug(this.scene, this.camera, this.directionalLight, this.controls);
 
-  handleResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-  }
+        // Handle window resize
+        window.addEventListener('resize', () => this.handleResize());
 
-  add(object) {
-    this.scene.add(object);
-  }
+        // Add keyboard shortcut to log camera values
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'p') {
+                const config = {
+                    position: {
+                        x: Number(this.camera.position.x.toFixed(2)),
+                        y: Number(this.camera.position.y.toFixed(2)),
+                        z: Number(this.camera.position.z.toFixed(2))
+                    },
+                    lookAt: this.debug.cameraValues.lookAt
+                };
+                console.log(JSON.stringify(config, null, 2));
+            }
+        });
+    }
 
-  remove(object) {
-    this.scene.remove(object);
-  }
+    handleResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
 
-  render() {
-    if (this.renderer && this.scene && this.camera) {
+    add(object) {
+        this.scene.add(object);
+    }
+
+    remove(object) {
+        this.scene.remove(object);
+    }
+
+    render() {
+        if (this.controls) {
+            this.controls.update();
+        }
         this.renderer.render(this.scene, this.camera);
     }
-  }
 }

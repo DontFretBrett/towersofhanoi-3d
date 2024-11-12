@@ -21,7 +21,21 @@ export const CAMERA_CONFIG = {
   far: 1000,
   position: {
     x: 0,
-    y: 4,
-    z: 12
+    y: 8,    
+    z: 15    
+  },
+  lookAt: {
+    x: 0,
+    y: -3,    // Look lower to center the game
+    z: 0
+  }
+};
+
+// Scene lighting position
+export const LIGHT_CONFIG = {
+  position: {
+    x: 10,
+    y: 10,
+    z: 10
   }
 };

@@ -6,7 +6,7 @@ export class Animation {
             z: disk.mesh.position.z
         };
         
-        const steps = 10;
+        const steps = 5;
         const stepDuration = duration / steps;
         
         const deltaX = (targetPosition.x - startPosition.x) / steps;

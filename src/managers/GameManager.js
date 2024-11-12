@@ -37,7 +37,6 @@ export class GameManager {
   }
 
   createDisks() {
-    // Make sure we don't exceed the available colors
     const numDisks = Math.min(this.numDisks, DISK_COLORS.length);
     
     for (let i = 0; i < numDisks; i++) {
@@ -46,7 +45,11 @@ export class GameManager {
         radius,
         DISK_CONFIG.height,
         DISK_COLORS[i],
-        [this.rods[0].rod.position.x, (i * 0.35) + 0.3, 0]
+        [
+          this.rods[0].rod.position.x, 
+          (i * 0.35) + 0.3,
+          0
+        ]
       );
       this.disks.push(disk);
       this.rods[0].addDisk(disk);

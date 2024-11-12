@@ -80,3 +80,35 @@ canvas {
   height: 100%;
   z-index: 1;
 }
+
+/* Debug Panel Styles */
+.dg.main {
+    position: fixed !important;
+    top: 60px !important;
+    right: 10px !important;
+    z-index: 9999 !important;
+}
+
+.dg.main.a {
+    margin-right: 0 !important;
+}
+
+/* Make sure debug panel is above other UI elements */
+.dg {
+    z-index: 3000 !important;
+}
+
+/* Ensure debug panel text is visible */
+.dg .property-name {
+    color: #ddd !important;
+}
+
+.dg .c {
+    color: #ddd !important;
+}
+
+/* Make sure number inputs are visible */
+.dg .c input[type=text] {
+    background: #303030 !important;
+    color: #ddd !important;
+}
