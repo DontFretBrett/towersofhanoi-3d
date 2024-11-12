@@ -77,6 +77,31 @@ The game is set up with a 3D scene where:
 - **`createRods()`**: Creates rods in the scene.
 - **`createDisks()`**: Creates disks in the scene.
 - **`setupEventListeners()`**: Sets up event listeners for user interaction.
+- **`moveDiskToRod()`**: Handles disk movement logic and victory conditions.
+- **`resetGame()`**: Resets the game state and creates new disks.
+- **`startTimer()`**, **`stopTimer()`**, **`updateTimer()`**: Handle game timing functionality.
+
+### Game Features
+
+- Responsive design that adapts to window resizing
+- Enhanced visual elements with optimized sizing and spacing
+- Improved camera positioning for better gameplay view
+- Interactive disk selection and movement using number keys (1-3)
+- Move counter and timer to track progress
+- Multiple difficulty levels (3-5 disks)
+- Victory detection and completion message
+- Reset button to start a new game
+- Difficulty selector to change number of disks
+- Real-time move counter and timer display
+
+## How to Play
+
+- Use number keys 1-3 to select and move disks between rods
+- Press the same rod number to deselect a disk
+- Selected disks are highlighted in yellow
+- Move all disks to the rightmost rod to win
+- The game tracks your moves and time
+- You can only place smaller disks on top of larger ones
 
 ## License
 
