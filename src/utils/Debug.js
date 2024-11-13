@@ -2,9 +2,12 @@ import * as dat from 'dat.gui';
 
 export class Debug {
     constructor(scene, camera, light, controls) {
+        this.createToggleButton();
+        
         this.gui = new dat.GUI({
             width: 300,
-            autoPlace: true
+            autoPlace: true,
+            closed: false
         });
         
         this.scene = scene;
@@ -34,15 +37,53 @@ export class Debug {
 
         this.setupCameraDebug();
         this.setupLightDebug();
+        this.setupMobileLayout();
+    }
 
-        // Force position the GUI
-        const guiContainer = this.gui.domElement.parentElement;
-        if (guiContainer) {
-            guiContainer.style.position = 'fixed';
-            guiContainer.style.top = '60px';
-            guiContainer.style.right = '10px';
-            guiContainer.style.zIndex = '9999';
+    createToggleButton() {
+        const button = document.createElement('button');
+        button.id = 'debug-toggle';
+        button.innerHTML = '⚙️';
+        button.className = 'debug-toggle';
+        document.body.appendChild(button);
+
+        // Set initial state
+        const isMobile = window.innerWidth <= 768;
+        const panel = document.querySelector('.dg.main');
+        if (panel && isMobile) {
+            panel.classList.remove('show-panel');
         }
+
+        button.addEventListener('click', () => {
+            const panel = document.querySelector('.dg.main');
+            if (panel) {
+                panel.classList.toggle('show-panel');
+                button.classList.toggle('active');
+            }
+        });
+
+        // Handle resize events
+        window.addEventListener('resize', () => {
+            const panel = document.querySelector('.dg.main');
+            if (panel) {
+                if (window.innerWidth <= 768) {
+                    panel.classList.remove('show-panel');
+                    button.classList.remove('active');
+                } else {
+                    panel.classList.remove('show-panel'); // Remove mobile class
+                }
+            }
+        });
+    }
+
+    setupMobileLayout() {
+        // Wait for GUI to be created
+        setTimeout(() => {
+            const panel = document.querySelector('.dg.main');
+            if (panel && window.innerWidth <= 768) {
+                panel.classList.remove('show-panel');
+            }
+        }, 100);
     }
 
     setupCameraDebug() {

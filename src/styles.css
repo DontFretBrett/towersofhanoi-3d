@@ -86,7 +86,8 @@ canvas {
     position: fixed !important;
     top: 60px !important;
     right: 10px !important;
-    z-index: 9999 !important;
+    z-index: 2999 !important;
+    transition: transform 0.3s ease;
 }
 
 .dg.main.a {
@@ -111,4 +112,65 @@ canvas {
 .dg .c input[type=text] {
     background: #303030 !important;
     color: #ddd !important;
+}
+
+/* Debug Panel Styles */
+.debug-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 3001;
+    font-size: 20px;
+    padding: 0;
+    line-height: 40px;
+    display: block;
+}
+
+.debug-toggle.active {
+    background: #4CAF50;
+}
+
+.debug-panel {
+    transition: transform 0.3s ease;
+    transform: translateX(100%);
+}
+
+.debug-panel.show-panel {
+    transform: translateX(0);
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    .debug-toggle {
+        display: block;
+    }
+
+    .dg.main {
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 250px !important;
+        height: 100vh !important;
+        background: rgba(0, 0, 0, 0.9);
+        transform: translateX(100%);
+    }
+
+    .dg.main.show-panel {
+        transform: translateX(0);
+    }
+
+    /* Adjust the close button position for better mobile touch */
+    .dg.main .close-button {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+    }
 }
