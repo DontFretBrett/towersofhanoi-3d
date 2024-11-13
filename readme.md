@@ -31,7 +31,7 @@ This project is a 3D implementation of the classic Towers of Hanoi puzzle game u
 3. Install the dependencies:
 
    ```bash
-   npm run dev
+   npm install
    ```
 
 ### Running the Game
