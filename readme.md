@@ -39,7 +39,7 @@ This project is a 3D implementation of the classic Towers of Hanoi puzzle game u
 To start the development server and open the game in your default browser, run:
 
 ```bash
-npm start
+npm run dev
 ```
 
 This will use Vite to bundle the application and serve it locally.
