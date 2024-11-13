@@ -10,7 +10,7 @@ export class Rod {
       roughness: 0.5
     });
     this.base = new THREE.Mesh(baseGeometry, baseMaterial);
-    this.base.position.set(position.x, 0.25, position.z);
+    this.base.position.set(position.x, 0.1, position.z);
     this.base.receiveShadow = true;
 
     // Create rod
@@ -21,15 +21,15 @@ export class Rod {
       roughness: 0.3
     });
     this.rod = new THREE.Mesh(rodGeometry, rodMaterial);
-    this.rod.position.set(position.x, height/2, position.z);
+    this.rod.position.set(position.x, height/2 + 0.1, position.z);
     this.rod.receiveShadow = true;
 
     this.disks = [];
   }
 
   addDisk(disk) {
-    const height = this.disks.length * 0.35;
-    disk.mesh.position.y = height + 0.3;
+    const stackHeight = this.disks.length * 0.35;
+    disk.mesh.position.y = 0.35 + stackHeight;
     this.disks.push(disk);
   }
 
