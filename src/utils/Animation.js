@@ -1,5 +1,7 @@
 export class Animation {
     static async moveDisk(disk, targetPosition, duration = 100) {
+        disk.isMoving = true;
+        
         const startPosition = {
             x: disk.mesh.position.x,
             y: disk.mesh.position.y,
@@ -14,8 +16,17 @@ export class Animation {
         const deltaZ = (targetPosition.z - startPosition.z) / steps;
 
         for (let i = 0; i < steps; i++) {
+            // Always wait for the step duration unless interrupted
             await new Promise(resolve => setTimeout(resolve, stepDuration));
             
+            // If interrupted, complete the movement instantly and break
+            if (disk.interrupted) {
+                disk.mesh.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+                disk.interrupted = false;
+                break;
+            }
+            
+            // Otherwise continue with normal animation
             disk.mesh.position.x += deltaX;
             disk.mesh.position.y += deltaY;
             disk.mesh.position.z += deltaZ;
@@ -23,5 +34,6 @@ export class Animation {
 
         // Ensure final position is exact
         disk.mesh.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+        disk.isMoving = false;
     }
 }

@@ -18,6 +18,7 @@ export class Disk {
     this.originalColor = color;
     this.originalMetalness = 0.3;
     this.originalRoughness = 0.5;
+    this.isMoving = false;
   }
 
   setPosition(x, y, z) {

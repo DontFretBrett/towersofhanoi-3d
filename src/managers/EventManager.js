@@ -8,6 +8,7 @@ export class EventManager {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     this.selectedRodIndex = -1;
+    this.isProcessingMove = false;
     
     // Create invisible click cylinders for each rod
     this.clickCylinders = [];
@@ -91,64 +92,84 @@ export class EventManager {
   }
 
   handleRodSelection(rodIndex) {
-    console.log('Rod selected:', rodIndex); // Debug log
     const gameManager = this.gameManager;
     const selectedRod = gameManager.rods[rodIndex];
 
     if (this.selectedRodIndex === -1) {
-      // Trying to select a disk
-      if (selectedRod.disks.length > 0) {
-        const topDisk = selectedRod.getTopDisk();
-        topDisk.highlight();
-        this.selectedRodIndex = rodIndex;
-        console.log('Disk selected from rod:', rodIndex); // Debug log
-      }
+        // Trying to select a disk
+        if (selectedRod.disks.length > 0) {
+            const topDisk = selectedRod.getTopDisk();
+            // Allow selection even if other disks are moving
+            if (!topDisk.isMoving) {
+                topDisk.highlight();
+                this.selectedRodIndex = rodIndex;
+            }
+        }
     } else {
-      // Trying to move a disk
-      const sourceRod = gameManager.rods[this.selectedRodIndex];
-      const targetRod = selectedRod;
+        // Trying to move a disk
+        const sourceRod = gameManager.rods[this.selectedRodIndex];
+        const targetRod = selectedRod;
+        const movingDisk = sourceRod.getTopDisk();
 
-      if (this.selectedRodIndex === rodIndex) {
-        // Deselect current disk
-        const topDisk = sourceRod.getTopDisk();
-        topDisk.resetColor();
-        this.selectedRodIndex = -1;
-        console.log('Disk deselected'); // Debug log
-      } else if (this.isValidMove(sourceRod, targetRod)) {
-        console.log('Moving disk from rod', this.selectedRodIndex, 'to rod', rodIndex); // Debug log
-        this.moveDisk(sourceRod, targetRod);
-      } else {
-        console.log('Invalid move attempted'); // Debug log
-      }
+        if (this.selectedRodIndex === rodIndex) {
+            // Deselect current disk if it's not moving
+            if (!movingDisk.isMoving) {
+                movingDisk.resetColor();
+                this.selectedRodIndex = -1;
+            }
+        } else if (this.isValidMove(sourceRod, targetRod)) {
+            // Allow the new move to proceed
+            movingDisk.resetColor();
+            this.selectedRodIndex = -1;
+            this.moveDisk(sourceRod, targetRod);
+        }
     }
   }
 
   isValidMove(sourceRod, targetRod) {
-    if (sourceRod.disks.length === 0) return false;
-    if (targetRod.disks.length === 0) return true;
+    if (!sourceRod || !targetRod) return false;
     
-    const movingDisk = sourceRod.getTopDisk();
+    const sourceDisk = sourceRod.getTopDisk();
+    if (!sourceDisk) return false;
+    if (sourceDisk.isMoving) return false;
+
+    // Important: Check ALL disks that are currently moving to this target rod
+    const movingDisksToTarget = this.gameManager.rods.flatMap(rod => 
+        rod.disks.filter(disk => 
+            disk.isMoving && 
+            disk.mesh.position.x === targetRod.rod.position.x
+        )
+    );
+
+    // If there are any disks moving to the target, use the smallest one for comparison
+    if (movingDisksToTarget.length > 0) {
+        const smallestMovingDisk = movingDisksToTarget.reduce((smallest, disk) => 
+            disk.geometry.parameters.radiusTop < smallest.geometry.parameters.radiusTop ? disk : smallest
+        );
+        
+        // Check if our source disk is larger than any disk that's moving to the target
+        if (sourceDisk.geometry.parameters.radiusTop >= smallestMovingDisk.geometry.parameters.radiusTop) {
+            return false;
+        }
+    }
+
+    // Check against the actual top disk on the target rod
     const targetDisk = targetRod.getTopDisk();
+    if (!targetDisk) return true;
     
-    // Compare disk radiuses for valid move
-    const movingRadius = movingDisk.geometry.parameters.radiusTop;
-    const targetRadius = targetDisk.geometry.parameters.radiusTop;
-    
-    return movingRadius < targetRadius;
+    return sourceDisk.geometry.parameters.radiusTop < targetDisk.geometry.parameters.radiusTop;
   }
 
   async moveDisk(sourceRod, targetRod) {
-    const disk = sourceRod.getTopDisk(); // Get disk without removing it yet
+    const disk = sourceRod.getTopDisk();
     if (!disk) return;
 
-    // Reset color before starting movement
     disk.resetColor();
     
     const finalHeight = targetRod.disks.length * 0.35 + 0.3;
     const liftHeight = 3;
 
     try {
-        // Now remove the disk from source rod
         sourceRod.removeDisk();
 
         // Step 1: Move up
@@ -182,7 +203,6 @@ export class EventManager {
         );
 
         targetRod.addDisk(disk);
-        this.selectedRodIndex = -1;
 
         // Update move counter
         this.gameManager.moveCounter++;
@@ -192,7 +212,6 @@ export class EventManager {
 
         if (this.gameManager.checkWin()) {
             const moves = this.gameManager.moveCounter;
-            // Stop the timer first
             this.gameManager.uiManager.timer.stop();
             const timeString = this.gameManager.uiManager.timer.getTimeString();
             
