@@ -36,6 +36,6 @@ export const LIGHT_CONFIG = {
   position: {
     x: 10,
     y: 10,
-    z: 10
+    z: -14
   }
 };
