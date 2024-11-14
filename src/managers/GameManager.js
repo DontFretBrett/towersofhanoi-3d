@@ -43,22 +43,23 @@ export class GameManager {
 
   createDisks() {
     const numDisks = Math.min(this.numDisks, DISK_COLORS.length);
+    const radiusDecrement = (DISK_CONFIG.maxRadius - DISK_CONFIG.minRadius) / (numDisks - 1);
     
     for (let i = 0; i < numDisks; i++) {
-      const radius = DISK_CONFIG.maxRadius - (i * 0.2);
-      const disk = new Disk(
-        radius,
-        DISK_CONFIG.height,
-        DISK_COLORS[i],
-        [
-          this.rods[0].rod.position.x, 
-          (i * 0.35) + 0.3,
-          0
-        ]
-      );
-      this.disks.push(disk);
-      this.rods[0].addDisk(disk);
-      this.scene.add(disk.mesh);
+        const radius = DISK_CONFIG.maxRadius - (i * radiusDecrement);
+        const disk = new Disk(
+            radius,
+            DISK_CONFIG.height,
+            DISK_COLORS[i],
+            [
+                this.rods[0].rod.position.x, 
+                (i * 0.35) + 0.3,
+                0
+            ]
+        );
+        this.disks.push(disk);
+        this.rods[0].addDisk(disk);
+        this.scene.add(disk.mesh);
     }
   }
 

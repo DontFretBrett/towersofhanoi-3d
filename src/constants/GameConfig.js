@@ -2,16 +2,21 @@ export const DISK_COLORS = [
     0xff0000,  // Red
     0x00ff00,  // Green
     0x0000ff,  // Blue
-    0xff00ff,  // Magenta/Purple
-    0x00ffff   // Cyan
+    0xff00ff,  // Magenta
+    0x00ffff,  // Cyan
+    0xffa500,  // Orange
+    0x800080,  // Purple
+    0x008000,  // Dark Green
+    0x4b0082,  // Indigo
+    0x800000   // Maroon
 ];
 
 // Bright, vibrant yellow for selection
 export const HIGHLIGHT_COLOR = 0xffff00;  // Pure yellow
 
 export const DISK_CONFIG = {
-  maxRadius: 1.4,
-  minRadius: 0.5,
+  maxRadius: 1.6,
+  minRadius: 0.4,
   height: 0.3
 };
 
