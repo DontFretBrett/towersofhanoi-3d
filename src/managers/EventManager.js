@@ -167,7 +167,7 @@ export class EventManager {
     disk.resetColor();
     
     const finalHeight = targetRod.disks.length * 0.35 + 0.3;
-    const liftHeight = 3;
+    const liftHeight = 4;
 
     try {
         sourceRod.removeDisk();
