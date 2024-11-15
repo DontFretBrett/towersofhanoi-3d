@@ -3,6 +3,7 @@ import { GAME_CONFIG } from '../constants/GameConfig';
 
 export class Rod {
   constructor(position, height = GAME_CONFIG.ROD.HEIGHT, radius = GAME_CONFIG.ROD.RADIUS, isDestination = false) {
+    this.isDestination = isDestination;
     // Create base
     const baseGeometry = new THREE.CylinderGeometry(1.8, 1.8, 0.2, 32);
     const baseMaterial = new THREE.MeshStandardMaterial({ 

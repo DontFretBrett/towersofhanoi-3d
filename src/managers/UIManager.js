@@ -24,6 +24,12 @@ export class UIManager {
       this.resetUI();
     });
 
+    const randomizeButton = document.getElementById('randomize');
+    randomizeButton.addEventListener('click', () => {
+      this.gameManager.randomize();
+      this.resetUI();
+    });
+
     this.difficultySelect.addEventListener('change', (e) => {
       const newDifficulty = parseInt(e.target.value);
       this.gameManager.numDisks = newDifficulty;
