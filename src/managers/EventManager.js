@@ -45,7 +45,7 @@ export class EventManager {
 
     // Create new invisible cylinders for each rod
     this.gameManager.rods.forEach((rod, index) => {
-      const geometry = new THREE.CylinderGeometry(0.5, 0.5, 4, 16);
+      const geometry = new THREE.CylinderGeometry(1.8, 1.8, 8, 16);
       const material = new THREE.MeshBasicMaterial({
         visible: false
       });
@@ -54,7 +54,7 @@ export class EventManager {
       // Position cylinder at rod position
       cylinder.position.set(
         rod.rod.position.x,
-        2, // Half height of cylinder
+        4,
         rod.rod.position.z
       );
       
