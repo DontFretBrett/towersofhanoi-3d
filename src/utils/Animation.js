@@ -1,5 +1,7 @@
+import { GAME_CONFIG } from '../constants/GameConfig';
+
 export class Animation {
-    static async moveDisk(disk, targetPosition, duration = 100) {
+    static async moveDisk(disk, targetPosition, duration = GAME_CONFIG.ANIMATION.DURATION) {
         disk.isMoving = true;
         
         const startPosition = {
@@ -8,7 +10,7 @@ export class Animation {
             z: disk.mesh.position.z
         };
         
-        const steps = 5;
+        const steps = GAME_CONFIG.ANIMATION.STEPS;
         const stepDuration = duration / steps;
         
         const deltaX = (targetPosition.x - startPosition.x) / steps;

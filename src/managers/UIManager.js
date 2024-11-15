@@ -1,10 +1,14 @@
 import { Timer } from '../utils/Timer';
+import { GAME_CONFIG } from '../constants/GameConfig';
 
 export class UIManager {
   constructor(gameManager) {
     this.gameManager = gameManager;
     this.moveCounter = document.getElementById('move-counter');
-    this.timer = new Timer(document.getElementById('timer'));
+    this.timer = new Timer(
+      document.getElementById('timer'), 
+      GAME_CONFIG.UI.UPDATE_INTERVAL
+    );
     this.resetButton = document.getElementById('reset');
     this.difficultySelect = document.getElementById('difficulty');
     this.hasStarted = false;

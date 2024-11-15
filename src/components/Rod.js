@@ -1,7 +1,8 @@
 import * as THREE from 'three';
+import { GAME_CONFIG } from '../constants/GameConfig';
 
 export class Rod {
-  constructor(position, height = 4, radius = 0.1, isDestination = false) {
+  constructor(position, height = GAME_CONFIG.ROD.HEIGHT, radius = GAME_CONFIG.ROD.RADIUS, isDestination = false) {
     // Create base
     const baseGeometry = new THREE.CylinderGeometry(1.8, 1.8, 0.2, 32);
     const baseMaterial = new THREE.MeshStandardMaterial({ 
@@ -46,5 +47,12 @@ export class Rod {
     group.add(this.base);
     group.add(this.rod);
     return group;
+  }
+
+  dispose() {
+    this.base.geometry.dispose();
+    this.base.material.dispose();
+    this.rod.geometry.dispose();
+    this.rod.material.dispose();
   }
 }

@@ -1,6 +1,6 @@
 import { Rod } from '../components/Rod';
 import { Disk } from '../components/Disk';
-import { DISK_COLORS, DISK_CONFIG } from '../constants/GameConfig';
+import { DISK_COLORS, DISK_CONFIG, GAME_CONFIG } from '../constants/GameConfig';
 import { Table } from '../components/Table';
 
 export class GameManager {
@@ -29,9 +29,9 @@ export class GameManager {
 
   createRods() {
     const positions = [
-      { x: -4, z: 0 },
+      { x: -GAME_CONFIG.ROD.SPACING, z: 0 },
       { x: 0, z: 0 },
-      { x: 4, z: 0 }
+      { x: GAME_CONFIG.ROD.SPACING, z: 0 }
     ];
 
     positions.forEach((pos, index) => {

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DISK_COLORS } from '../constants/GameConfig';
+import { DISK_COLORS, GAME_CONFIG } from '../constants/GameConfig';
 import { Animation } from '../utils/Animation';
 
 export class EventManager {
@@ -35,34 +35,27 @@ export class EventManager {
   }
 
   createClickCylinders() {
-    // Clear existing cylinders
-    this.clickCylinders.forEach(cylinder => {
-      cylinder.geometry.dispose();
-      cylinder.material.dispose();
-      this.gameManager.scene.remove(cylinder);
-    });
-    this.clickCylinders = [];
-
-    // Create new invisible cylinders for each rod
+    if (this.clickCylinders.length > 0) return;
+    
     this.gameManager.rods.forEach((rod, index) => {
-      const geometry = new THREE.CylinderGeometry(1.8, 1.8, 8, 16);
-      const material = new THREE.MeshBasicMaterial({
-        visible: false
-      });
-      const cylinder = new THREE.Mesh(geometry, material);
-      
-      // Position cylinder at rod position
-      cylinder.position.set(
-        rod.rod.position.x,
-        4,
-        rod.rod.position.z
-      );
-      
-      // Store rod index for later reference
-      cylinder.userData.rodIndex = index;
-      
-      this.clickCylinders.push(cylinder);
-      this.gameManager.scene.add(cylinder);
+        const geometry = new THREE.CylinderGeometry(1.8, 1.8, 8, 16);
+        const material = new THREE.MeshBasicMaterial({
+            visible: false
+        });
+        const cylinder = new THREE.Mesh(geometry, material);
+        
+        // Position cylinder at rod position
+        cylinder.position.set(
+            rod.rod.position.x,
+            4,
+            rod.rod.position.z
+        );
+        
+        // Store rod index for later reference
+        cylinder.userData.rodIndex = index;
+        
+        this.clickCylinders.push(cylinder);
+        this.gameManager.scene.add(cylinder);
     });
   }
 
@@ -167,7 +160,7 @@ export class EventManager {
     disk.resetColor();
     
     const finalHeight = targetRod.disks.length * 0.35 + 0.3;
-    const liftHeight = 4;
+    const liftHeight = GAME_CONFIG.ANIMATION.LIFT_HEIGHT;
 
     try {
         sourceRod.removeDisk();
@@ -221,6 +214,12 @@ export class EventManager {
         }
     } catch (error) {
         console.error('Movement error:', error);
+    }
+  }
+
+  async animateMove(disk, positions) {
+    for (const position of positions) {
+        await Animation.moveDisk(disk, position);
     }
   }
 }

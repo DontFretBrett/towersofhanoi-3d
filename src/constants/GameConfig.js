@@ -44,3 +44,19 @@ export const LIGHT_CONFIG = {
     z: -14
   }
 };
+
+export const GAME_CONFIG = {
+    ANIMATION: {
+        DURATION: 100,
+        STEPS: 5,
+        LIFT_HEIGHT: 4
+    },
+    ROD: {
+        HEIGHT: 4,
+        RADIUS: 0.1,
+        SPACING: 4
+    },
+    UI: {
+        UPDATE_INTERVAL: 1000
+    }
+};
