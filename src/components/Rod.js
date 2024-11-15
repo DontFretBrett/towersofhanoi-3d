@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
 export class Rod {
-  constructor(position, height = 4, radius = 0.1) {
+  constructor(position, height = 4, radius = 0.1, isDestination = false) {
     // Create base
     const baseGeometry = new THREE.CylinderGeometry(1.8, 1.8, 0.2, 32);
     const baseMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x4a4a4a,
+      color: isDestination ? 0x4a8a4a : 0x4a4a4a,
       metalness: 0.5,
       roughness: 0.5
     });
@@ -16,7 +16,7 @@ export class Rod {
     // Create rod
     const rodGeometry = new THREE.CylinderGeometry(radius, radius, height, 16);
     const rodMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x808080,
+      color: isDestination ? 0x80a080 : 0x808080,
       metalness: 0.7,
       roughness: 0.3
     });

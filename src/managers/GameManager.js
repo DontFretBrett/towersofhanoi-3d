@@ -34,10 +34,11 @@ export class GameManager {
       { x: 4, z: 0 }
     ];
 
-    positions.forEach(pos => {
-      const rod = new Rod(pos);
-      this.rods.push(rod);
-      this.scene.add(rod.getMesh());
+    positions.forEach((pos, index) => {
+        const isDestination = index === 2;  // Third rod is destination
+        const rod = new Rod(pos, 4, 0.1, isDestination);
+        this.rods.push(rod);
+        this.scene.add(rod.getMesh());
     });
   }
 
