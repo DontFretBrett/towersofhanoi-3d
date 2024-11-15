@@ -18,6 +18,8 @@ export class Disk {
     this.originalColor = color;
     this.originalMetalness = 0.3;
     this.originalRoughness = 0.5;
+    
+    // Movement tracking
     this.isMoving = false;
   }
 
@@ -26,10 +28,14 @@ export class Disk {
   }
 
   highlight() {
-    this.material.color.setHex(HIGHLIGHT_COLOR);
+    // Create a brighter version of the disk's color
+    const color = new THREE.Color(this.originalColor);
+    color.multiplyScalar(1.5);  // Make it 50% brighter
+    
+    this.material.color.copy(color);
     this.material.metalness = 0.1;  // Less metallic for brighter appearance
     this.material.roughness = 0.2;  // Smoother for more shine
-    this.material.emissive.setHex(0x333333);  // Add slight glow
+    this.material.emissive.copy(color.multiplyScalar(0.3));  // Add glow effect
   }
 
   resetColor() {
