@@ -83,9 +83,22 @@ export class Scene {
     }
 
     handleResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const pixelRatio = Math.min(window.devicePixelRatio, 2);
+
+        this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(pixelRatio);
+        
+        // Update camera position based on screen size
+        if (width < 768) {
+            this.camera.position.z = 20; // Mobile view
+        } else {
+            this.camera.position.z = 15; // Desktop view
+        }
     }
 
     add(object) {

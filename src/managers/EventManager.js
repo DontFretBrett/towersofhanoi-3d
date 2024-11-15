@@ -165,34 +165,26 @@ export class EventManager {
     try {
         sourceRod.removeDisk();
 
-        // Step 1: Move up
-        await Animation.moveDisk(
-            disk,
-            {
-                x: disk.mesh.position.x,
-                y: liftHeight,
-                z: 0
-            }
-        );
-
-        // Step 2: Move horizontally
+        // Combined vertical and horizontal movement for smoother transition
         await Animation.moveDisk(
             disk,
             {
                 x: targetRod.rod.position.x,
                 y: liftHeight,
                 z: 0
-            }
+            },
+            0.15 // Even faster for the lift-and-move phase
         );
 
-        // Step 3: Move down
+        // Quick drop down
         await Animation.moveDisk(
             disk,
             {
                 x: targetRod.rod.position.x,
                 y: finalHeight,
                 z: 0
-            }
+            },
+            0.1 // Fast drop
         );
 
         targetRod.addDisk(disk);
