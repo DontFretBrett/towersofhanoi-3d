@@ -78,17 +78,22 @@ The game is set up with a 3D scene where:
 
 ### Key Functions
 
-- **`init()`**: Initializes the scene, camera, renderer, and game components.
-- **`setupRenderer()`**: Configures the renderer.
-- **`setupScene()`**: Sets up the scene.
-- **`setupCamera()`**: Configures the camera.
-- **`setupLighting()`**: Adds lighting to the scene.
-- **`createRods()`**: Creates rods in the scene.
-- **`createDisks()`**: Creates disks in the scene.
-- **`setupEventListeners()`**: Sets up event listeners for user interaction.
-- **`moveDiskToRod()`**: Handles disk movement logic and victory conditions.
-- **`resetGame()`**: Resets the game state and creates new disks.
-- **`startTimer()`**, **`stopTimer()`**, **`updateTimer()`**: Handle game timing functionality.
+- **`init()`**: Initializes the scene, camera, renderer, and game components
+- **`setupRenderer()`**: Configures the renderer
+- **`setupScene()`**: Sets up the scene
+- **`setupCamera()`**: Configures the camera
+- **`setupLighting()`**: Adds lighting to the scene
+- **`createRods()`**: Creates rods in the scene
+- **`createDisks()`**: Creates disks in the scene
+- **`setupEventListeners()`**: Sets up event listeners for user interaction
+- **`moveDisk()`**: Handles disk movement animation and logic
+- **`handleRodSelection()`**: Manages rod selection and validation
+- **`isValidMove()`**: Validates disk movements between rods
+- **`checkWin()`**: Checks for victory condition
+- **`randomize()`**: Randomizes disk positions for varied gameplay
+- **`calculateOptimalMoves()`**: Calculates minimum moves needed
+- **`resetGame()`**: Resets the game state and creates new disks
+- **`updateUI()`**: Updates move counter, timer, and optimal moves display
 
 ### Game Features
 
