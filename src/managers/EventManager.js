@@ -214,4 +214,25 @@ export class EventManager {
         await Animation.moveDisk(disk, position);
     }
   }
+
+  setupClickDetection() {
+    // Remove existing click cylinders
+    this.clickCylinders.forEach(cylinder => {
+      this.gameManager.scene.remove(cylinder);
+    });
+    this.clickCylinders = [];
+
+    // Create new click cylinders
+    this.gameManager.rods.forEach((rod, index) => {
+      const clickGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
+      const clickMaterial = new THREE.MeshBasicMaterial({ 
+        visible: false 
+      });
+      const clickCylinder = new THREE.Mesh(clickGeometry, clickMaterial);
+      clickCylinder.position.copy(rod.rod.position);
+      clickCylinder.userData.rodIndex = index;
+      this.clickCylinders.push(clickCylinder);
+      this.gameManager.scene.add(clickCylinder);
+    });
+  }
 }

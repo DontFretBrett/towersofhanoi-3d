@@ -174,3 +174,16 @@ canvas {
         line-height: 30px;
     }
 }
+
+#stats span {
+  margin-right: 20px;
+}
+
+#stats span:last-child {
+  margin-right: 0;
+}
+
+#optimal-moves {
+  color: #4CAF50;
+  font-weight: bold;
+}

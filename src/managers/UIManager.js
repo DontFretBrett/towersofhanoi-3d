@@ -5,6 +5,7 @@ export class UIManager {
   constructor(gameManager) {
     this.gameManager = gameManager;
     this.moveCounter = document.getElementById('move-counter');
+    this.optimalMoves = document.getElementById('optimal-moves');
     this.timer = new Timer(
       document.getElementById('timer'), 
       GAME_CONFIG.UI.UPDATE_INTERVAL
@@ -46,8 +47,13 @@ export class UIManager {
     this.moveCounter.textContent = moves;
   }
 
+  updateOptimalMoves(moves) {
+    this.optimalMoves.textContent = moves;
+  }
+
   resetUI() {
     this.moveCounter.textContent = '0';
+    this.optimalMoves.textContent = this.gameManager.optimalMoves;
     this.timer.reset();
     this.hasStarted = false;
   }

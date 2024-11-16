@@ -2,6 +2,7 @@ import { Rod } from '../components/Rod';
 import { Disk } from '../components/Disk';
 import { DISK_COLORS, DISK_CONFIG, GAME_CONFIG } from '../constants/GameConfig';
 import { Table } from '../components/Table';
+import { MoveCalculator } from '../utils/MoveCalculator';
 
 export class GameManager {
   constructor(scene) {
@@ -10,6 +11,7 @@ export class GameManager {
     this.disks = [];
     this.selectedDisk = null;
     this.moveCounter = 0;
+    this.optimalMoves = 0;
     this.numDisks = 3;
     this.uiManager = null;
   }
@@ -25,6 +27,10 @@ export class GameManager {
     
     this.createRods();
     this.createDisks();
+    this.optimalMoves = MoveCalculator.getStandardMinimumMoves(this.numDisks);
+    if (this.uiManager) {
+      this.uiManager.updateOptimalMoves(this.optimalMoves);
+    }
   }
 
   createRods() {
@@ -75,8 +81,8 @@ export class GameManager {
     this.disks = [];
     this.rods.forEach(rod => {
       rod.disks = [];
-      // Reset destination status and appearance
-      rod.isDestination = (rod === this.rods[2]); // Make third rod the destination
+      // Reset destination status
+      rod.isDestination = (rod === this.rods[2]);
       rod.base.material.color.setHex(rod.isDestination ? 0x4a8a4a : 0x4a4a4a);
       rod.rod.material.color.setHex(rod.isDestination ? 0x80a080 : 0x808080);
     });
@@ -86,6 +92,12 @@ export class GameManager {
     
     // Create new disks
     this.createDisks();
+    
+    // Calculate optimal moves for standard configuration
+    this.optimalMoves = MoveCalculator.getStandardMinimumMoves(this.numDisks);
+    if (this.uiManager) {
+      this.uiManager.updateOptimalMoves(this.optimalMoves);
+    }
   }
 
   checkWin() {
@@ -140,16 +152,22 @@ export class GameManager {
     const destinationRodIndex = Math.floor(Math.random() * 3);
     this.rods.forEach((rod, index) => {
       rod.isDestination = (index === destinationRodIndex);
-      // Update rod appearance
       rod.base.material.color.setHex(rod.isDestination ? 0x4a8a4a : 0x4a4a4a);
       rod.rod.material.color.setHex(rod.isDestination ? 0x80a080 : 0x808080);
     });
 
-    // Randomly distribute disks while maintaining size order
+    // Sort disks by size (largest to smallest)
     this.disks.sort((a, b) => b.geometry.parameters.radiusTop - a.geometry.parameters.radiusTop);
-    
-    this.disks.forEach(disk => {
+
+    // Ensure at least one disk is not on the destination rod
+    let firstDiskPlaced = false;
+    this.disks.forEach((disk, index) => {
       const availableRods = this.rods.filter(rod => {
+        // If this is the first disk and we haven't placed one yet,
+        // exclude the destination rod as an option
+        if (!firstDiskPlaced && rod.isDestination) {
+          return false;
+        }
         const topDisk = rod.getTopDisk();
         return !topDisk || topDisk.geometry.parameters.radiusTop > disk.geometry.parameters.radiusTop;
       });
@@ -158,6 +176,42 @@ export class GameManager {
       const stackHeight = randomRod.disks.length * 0.35 + 0.3;
       disk.mesh.position.set(randomRod.rod.position.x, stackHeight, 0);
       randomRod.addDisk(disk);
+
+      // Mark that we've placed at least one disk not on destination
+      if (!randomRod.isDestination) {
+        firstDiskPlaced = true;
+      }
     });
+
+    // If all disks somehow ended up on destination rod (extremely unlikely now),
+    // move the top disk to a random non-destination rod
+    if (!firstDiskPlaced) {
+      const destRod = this.rods[destinationRodIndex];
+      const topDisk = destRod.removeDisk();
+      const nonDestRods = this.rods.filter(rod => !rod.isDestination);
+      const randomRod = nonDestRods[Math.floor(Math.random() * nonDestRods.length)];
+      const stackHeight = randomRod.disks.length * 0.35 + 0.3;
+      topDisk.mesh.position.set(randomRod.rod.position.x, stackHeight, 0);
+      randomRod.addDisk(topDisk);
+    }
+
+    // Reset selection state
+    this.selectedDisk = null;
+    
+    // Ensure event manager is reset
+    if (this.eventManager) {
+      this.eventManager.selectedRodIndex = -1;
+      this.eventManager.setupClickDetection();
+    }
+
+    // Calculate optimal moves
+    this.optimalMoves = MoveCalculator.calculateOptimalMoves(
+      this.rods,
+      this.rods.findIndex(rod => rod.isDestination)
+    );
+    
+    if (this.uiManager) {
+      this.uiManager.updateOptimalMoves(this.optimalMoves);
+    }
   }
 }
