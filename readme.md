@@ -62,10 +62,11 @@ npm run build
 
 This will create a `dist` directory with the bundled files.
 
-## Libraries Used
+## Dependencies
 
-- **Three.js**: Used for rendering 3D graphics.
-- **@tweenjs/tween.js**: Used for smooth animations and transitions.
+- **Three.js**: 3D graphics rendering engine
+- **GSAP**: Animation library for smooth disk movements
+- **Vite**: Build tool and development server
 
 ## Game Overview
 
@@ -117,6 +118,7 @@ This project is licensed under the MIT License.
 
 ## Acknowledgments
 
+Thanks to the creators and maintainers of:
 - [Three.js](https://threejs.org/)
-- Vite
-- [@tweenjs/tween.js](https://github.com/tweenjs/tween.js)
+- [GSAP](https://greensock.com/gsap/)
+- [Vite](https://vitejs.dev/)
