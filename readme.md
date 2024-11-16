@@ -37,7 +37,7 @@ This project is a 3D implementation of the classic Towers of Hanoi puzzle game u
 
 2. Navigate to the project directory:
    ```bash
-   cd towers-of-hanoi-3d
+   cd towersofhanoi-3d
    ```
 
 3. Install the dependencies:
