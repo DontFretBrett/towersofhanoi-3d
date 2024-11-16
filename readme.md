@@ -100,12 +100,14 @@ The game is set up with a 3D scene where:
 
 ## How to Play
 
-- Use number keys 1-3 to select and move disks between rods
-- Press the same rod number to deselect a disk
-- Selected disks are highlighted in yellow
-- Move all disks to the rightmost rod to win
+- Use number keys 1-3 or click/tap the rods to select and move disks
+- Press the same rod number or click/tap the same rod to deselect a disk
+- Selected disks are highlighted with a bright glow effect
+- Move all disks to the green destination rod to win
 - The game tracks your moves and time
 - You can only place smaller disks on top of larger ones
+- Use the difficulty selector to change the number of disks (3-10)
+- Click 'Randomize' to start with a random valid configuration
 
 ## License
 
