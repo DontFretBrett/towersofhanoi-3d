@@ -26,12 +26,6 @@ export class Debug {
                 x: 0,
                 y: 0,
                 z: 0
-            },
-            syncTarget: () => {
-                this.cameraValues.lookAt.x = this.controls.target.x;
-                this.cameraValues.lookAt.y = this.controls.target.y;
-                this.cameraValues.lookAt.z = this.controls.target.z;
-                this.gui.updateDisplay();
             }
         };
 
@@ -121,9 +115,6 @@ export class Debug {
                 this.controls.target.z = this.cameraValues.lookAt.z;
                 this.controls.update();
             });
-
-        // Add sync button
-        lookAtFolder.add(this.cameraValues, 'syncTarget').name('Sync from Camera');
 
         cameraFolder.open();
         posFolder.open();

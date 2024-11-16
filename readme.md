@@ -1,42 +1,50 @@
 # Towers of Hanoi - 3D Game
 
+![Game Screenshot](game.png)
+
 This project is a 3D implementation of the classic Towers of Hanoi puzzle game using Three.js. The game provides an interactive experience where users can solve the puzzle by moving disks between rods.
 
-## Project Structure
+## Features
 
-- **`src/index.js`**: Main JavaScript file where the Three.js scene is initialized and the game logic is implemented.
-- **`index.html`**: HTML file that includes the Three.js application.
-- **`src/styles.css`**: Basic styles for the application.
+- Interactive 3D environment with optimized graphics
+- Multiple difficulty levels (3-10 disks)
+- Mouse/touch and keyboard controls
+- Move counter and timer
+- Optimal moves calculator
+- Smooth animations using GSAP
+- Debug panel for development
+- Responsive design for all screen sizes
+- Real-time move validation
+- Victory detection
+- Wood-textured table surface
+- Destination rod highlighting
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js and npm should be installed on your machine.
+- Node.js and npm installed on your machine
 
 ### Installation
 
 1. Clone the repository:
-
    ```bash
    git clone <repository-url>
    ```
 
 2. Navigate to the project directory:
-
    ```bash
    cd towers-of-hanoi-3d
    ```
 
 3. Install the dependencies:
-
    ```bash
    npm install
    ```
 
 ### Running the Game
 
-To start the development server and open the game in your default browser, run:
+To start the development server:
 
 ```bash
 npm run dev
@@ -46,7 +54,7 @@ This will use Vite to bundle the application and serve it locally.
 
 ### Building for Production
 
-To build the project for production, run:
+To create a production build:
 
 ```bash
 npm run build
