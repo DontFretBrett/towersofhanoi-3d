@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GAME_CONFIG } from '../constants/GameConfig';
+import { GAME_CONFIG, DISK_CONFIG } from '../constants/GameConfig';
 
 export class Rod {
   constructor(position, height = GAME_CONFIG.ROD.HEIGHT, radius = GAME_CONFIG.ROD.RADIUS, isDestination = false) {
@@ -30,8 +30,9 @@ export class Rod {
   }
 
   addDisk(disk) {
-    const stackHeight = this.disks.length * 0.35;
-    disk.mesh.position.y = 0.35 + stackHeight;
+    const effectiveDiskThickness = DISK_CONFIG.height + DISK_CONFIG.SPACING;
+    const stackHeight = this.disks.length * effectiveDiskThickness;
+    disk.mesh.position.y = effectiveDiskThickness + stackHeight;
     this.disks.push(disk);
   }
 

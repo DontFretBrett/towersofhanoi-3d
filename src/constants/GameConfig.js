@@ -17,7 +17,8 @@ export const HIGHLIGHT_COLOR = 0xffff00;  // Pure yellow
 export const DISK_CONFIG = {
   maxRadius: 1.6,
   minRadius: 0.4,
-  height: 0.3
+  height: 0.3,
+  SPACING: 0.05
 };
 
 export const CAMERA_CONFIG = {
@@ -49,7 +50,9 @@ export const GAME_CONFIG = {
     ANIMATION: {
         DURATION: 100,
         STEPS: 5,
-        LIFT_HEIGHT: 4
+        LIFT_HEIGHT: 4,
+        LIFT_DURATION: 0.15,
+        DROP_DURATION: 0.1
     },
     ROD: {
         HEIGHT: 4,
