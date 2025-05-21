@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DISK_COLORS, GAME_CONFIG } from '../constants/GameConfig';
+import { DISK_COLORS, GAME_CONFIG, DISK_CONFIG } from '../constants/GameConfig';
 import { Animation } from '../utils/Animation';
 
 export class EventManager {
@@ -8,7 +8,6 @@ export class EventManager {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     this.selectedRodIndex = -1;
-    this.isProcessingMove = false;
     
     // Create invisible click cylinders for each rod
     this.clickCylinders = [];
@@ -31,32 +30,7 @@ export class EventManager {
     }, { passive: false });
 
     // Create invisible cylinders for click/tap detection
-    this.createClickCylinders();
-  }
-
-  createClickCylinders() {
-    if (this.clickCylinders.length > 0) return;
-    
-    this.gameManager.rods.forEach((rod, index) => {
-        const geometry = new THREE.CylinderGeometry(1.8, 1.8, 8, 16);
-        const material = new THREE.MeshBasicMaterial({
-            visible: false
-        });
-        const cylinder = new THREE.Mesh(geometry, material);
-        
-        // Position cylinder at rod position
-        cylinder.position.set(
-            rod.rod.position.x,
-            4,
-            rod.rod.position.z
-        );
-        
-        // Store rod index for later reference
-        cylinder.userData.rodIndex = index;
-        
-        this.clickCylinders.push(cylinder);
-        this.gameManager.scene.add(cylinder);
-    });
+    this.setupClickDetection();
   }
 
   onPointerDown(event) {
@@ -159,7 +133,11 @@ export class EventManager {
 
     disk.resetColor();
     
-    const finalHeight = targetRod.disks.length * 0.35 + 0.3;
+    const effectiveDiskThickness = DISK_CONFIG.height + DISK_CONFIG.SPACING;
+    // Calculate Y position for the center of the disk on the target rod
+    // (targetRod.disks.length will be its index in the stack, 0-based)
+    const finalHeight = (targetRod.disks.length * effectiveDiskThickness) + effectiveDiskThickness;
+
     const liftHeight = GAME_CONFIG.ANIMATION.LIFT_HEIGHT;
 
     try {
@@ -170,13 +148,13 @@ export class EventManager {
             disk,
             {
                 x: targetRod.rod.position.x,
-                y: liftHeight,
+                y: liftHeight, // Lift to this absolute Y
                 z: 0
             },
-            0.15 // Even faster for the lift-and-move phase
+            GAME_CONFIG.ANIMATION.LIFT_DURATION
         );
 
-        // Quick drop down
+        // Quick drop down to final calculated height
         await Animation.moveDisk(
             disk,
             {
@@ -184,10 +162,10 @@ export class EventManager {
                 y: finalHeight,
                 z: 0
             },
-            0.1 // Fast drop
+            GAME_CONFIG.ANIMATION.DROP_DURATION
         );
 
-        targetRod.addDisk(disk);
+        targetRod.addDisk(disk); // addDisk will use its own logic to place, but animation should target this finalHeight
 
         // Update move counter
         this.gameManager.moveCounter++;
@@ -209,27 +187,29 @@ export class EventManager {
     }
   }
 
-  async animateMove(disk, positions) {
-    for (const position of positions) {
-        await Animation.moveDisk(disk, position);
-    }
-  }
-
   setupClickDetection() {
     // Remove existing click cylinders
     this.clickCylinders.forEach(cylinder => {
       this.gameManager.scene.remove(cylinder);
+      cylinder.geometry.dispose(); // Also dispose geometry and material
+      cylinder.material.dispose();
     });
     this.clickCylinders = [];
 
     // Create new click cylinders
     this.gameManager.rods.forEach((rod, index) => {
-      const clickGeometry = new THREE.CylinderGeometry(1, 1, 5, 32);
+      // Using the larger geometry from the original createClickCylinders for consistency
+      const clickGeometry = new THREE.CylinderGeometry(1.8, 1.8, 8, 16);
       const clickMaterial = new THREE.MeshBasicMaterial({ 
         visible: false 
       });
       const clickCylinder = new THREE.Mesh(clickGeometry, clickMaterial);
-      clickCylinder.position.copy(rod.rod.position);
+      // Position cylinder at rod x, z, but fixed Y for consistent click height
+      clickCylinder.position.set(
+        rod.rod.position.x,
+        4, // Consistent Y position from original createClickCylinders
+        rod.rod.position.z
+      );
       clickCylinder.userData.rodIndex = index;
       this.clickCylinders.push(clickCylinder);
       this.gameManager.scene.add(clickCylinder);

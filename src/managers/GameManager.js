@@ -60,7 +60,7 @@ export class GameManager {
             DISK_COLORS[i],
             [
                 this.rods[0].rod.position.x, 
-                (i * 0.35) + 0.3,
+                0, // Placeholder Y, Rod.addDisk will set the correct Y
                 0
             ]
         );

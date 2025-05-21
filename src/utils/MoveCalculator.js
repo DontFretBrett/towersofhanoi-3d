@@ -79,8 +79,6 @@ export class MoveCalculator {
     }
 
     // Fallback to prevent infinite loop
-    return this.getStandardMinimumMoves(
-      initialState.reduce((sum, rod) => sum + rod.length, 0)
-    );
+    return -1; // Should indicate an error or unreachable state if queue empties
   }
 } 
