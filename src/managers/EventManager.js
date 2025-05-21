@@ -194,6 +194,8 @@ export class EventManager {
         if (this.gameManager.uiManager) {
             this.gameManager.uiManager.updateMoveCounter(this.gameManager.moveCounter);
         }
+        
+        this.gameManager.recordCurrentState();
 
         if (this.gameManager.checkWin()) {
             const moves = this.gameManager.moveCounter;

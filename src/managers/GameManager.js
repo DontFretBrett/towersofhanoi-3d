@@ -1,5 +1,6 @@
 import { Rod } from '../components/Rod';
 import { Disk } from '../components/Disk';
+import { StateManager } from './StateManager';
 import { DISK_COLORS, DISK_CONFIG, GAME_CONFIG } from '../constants/GameConfig';
 import { Table } from '../components/Table';
 import { MoveCalculator } from '../utils/MoveCalculator';
@@ -14,6 +15,24 @@ export class GameManager {
     this.optimalMoves = 0;
     this.numDisks = 3;
     this.uiManager = null;
+    this.stateManager = new StateManager();
+  }
+
+  _getCurrentDiskConfiguration() {
+    return this.rods.map(rod =>
+      rod.disks.map(disk => ({
+        radius: disk.geometry.parameters.radiusTop,
+        color: disk.mesh.material.color.getHex()
+      }))
+    );
+  }
+
+  recordCurrentState() {
+    const gameState = {
+      diskConfiguration: this._getCurrentDiskConfiguration(),
+      moveCount: this.moveCounter
+    };
+    this.stateManager.pushState(gameState);
   }
 
   setUIManager(uiManager) {
@@ -31,6 +50,7 @@ export class GameManager {
     if (this.uiManager) {
       this.uiManager.updateOptimalMoves(this.optimalMoves);
     }
+    this.recordCurrentState();
   }
 
   createRods() {
@@ -98,6 +118,8 @@ export class GameManager {
     if (this.uiManager) {
       this.uiManager.updateOptimalMoves(this.optimalMoves);
     }
+    this.stateManager.clearHistory();
+    this.recordCurrentState();
   }
 
   checkWin() {
@@ -213,5 +235,87 @@ export class GameManager {
     if (this.uiManager) {
       this.uiManager.updateOptimalMoves(this.optimalMoves);
     }
+    this.stateManager.clearHistory();
+    this.recordCurrentState();
+  }
+
+  undoMove() {
+    // Step 1: Check History Length
+    // If history has only one state (the initial recorded state), there's nothing to undo *to*.
+    if (this.stateManager.getHistoryLength() <= 1) {
+      console.warn("Undo: Already at initial state or no history to undo to.");
+      return;
+    }
+
+    // Step 2: Pop and Discard Current State from history
+    // This removes the current state. The history's last element is now the state we want to restore.
+    this.stateManager.popState(); 
+
+    // Step 3: Get the state to restore (which is now the last one in history)
+    const stateToRestore = this.stateManager.history[this.stateManager.history.length - 1];
+    
+    // This check is a safeguard; theoretically, if getHistoryLength() > 1,
+    // after a pop, history should not be empty and its last element should exist.
+    if (!stateToRestore) {
+      console.error("Undo: Failed to get state to restore after popping. History might be corrupted.");
+      return;
+    }
+
+    // Step 4: Restore moveCounter
+    this.moveCounter = stateToRestore.moveCount;
+
+    // Step 5: Reset Selection State
+    if (this.selectedDisk) {
+      this.selectedDisk.resetColor(); // Visually unhighlight if a disk was selected
+      this.selectedDisk = null;
+    }
+    // GameManager does not directly manage EventManager's selectedRodIndex.
+    // EventManager should ideally observe gameManager.selectedDisk or be reset by UIManager/App.
+
+    // Step 6: Clear Current Disk Arrangement
+    // Remove existing disk meshes from the scene and dispose them
+    this.disks.forEach(disk => {
+      this.scene.remove(disk.mesh);
+      // Assuming Disk objects have a dispose method for their geometry/material
+      // Based on existing code in reset() and randomize() that calls disk.dispose() directly.
+      disk.dispose(); 
+    });
+    this.disks = []; // Clear the GameManager's master list of disks
+
+    // Clear internal disks array for each rod
+    this.rods.forEach(rod => {
+      rod.disks = [];
+    });
+
+    // Step 7: Recreate and Place Disks from stateToRestore
+    stateToRestore.diskConfiguration.forEach((rodConfig, rodIndex) => {
+      const targetRodObject = this.rods[rodIndex]; // The actual Rod object
+      rodConfig.forEach(diskData => {
+        const newDisk = new Disk(
+          diskData.radius,
+          DISK_CONFIG.height, // Height from constants
+          diskData.color      // Color from stored state
+        );
+
+        // Calculate Y position based on how many disks are already on this targetRodObject
+        // as we are adding them one by one during this restoration loop.
+        const yPos = (targetRodObject.disks.length * 0.35) + 0.3; // Consistent with createDisks/moveDisk
+        
+        newDisk.mesh.position.set(targetRodObject.rod.position.x, yPos, targetRodObject.rod.position.z);
+        
+        this.scene.add(newDisk.mesh);      // Add new disk's mesh to the scene
+        targetRodObject.addDisk(newDisk);  // Add disk to the Rod object's list
+        this.disks.push(newDisk);          // Add disk to GameManager's master list
+      });
+    });
+
+    // Step 8: Update UI
+    if (this.uiManager) {
+      this.uiManager.updateMoveCounter(this.moveCounter);
+    }
+
+    // The game state (this.disks, this.moveCounter, etc.) now matches stateToRestore.
+    // The StateManager's history already has stateToRestore as its last element because of popState().
+    // No need to call recordCurrentState() here, as that would add a duplicate entry of the restored state.
   }
 }

@@ -16,20 +16,41 @@ export class UIManager {
   }
 
   init() {
+    this.undoButton = document.getElementById('undo-button');
     this.setupEventListeners();
+    this.updateUndoButtonState(); // Initial state
+  }
+
+  updateUndoButtonState() {
+    if (this.gameManager && this.gameManager.stateManager && this.undoButton) {
+      const historyLength = this.gameManager.stateManager.getHistoryLength();
+      this.undoButton.disabled = historyLength <= 1;
+    } else if (this.undoButton) {
+      // If gameManager or stateManager is not ready, disable button by default
+      this.undoButton.disabled = true;
+    }
   }
 
   setupEventListeners() {
     this.resetButton.addEventListener('click', () => {
       this.gameManager.reset();
       this.resetUI();
+      this.updateUndoButtonState(); // Update after reset
     });
 
     const randomizeButton = document.getElementById('randomize');
     randomizeButton.addEventListener('click', () => {
       this.gameManager.randomize();
       this.resetUI();
+      this.updateUndoButtonState(); // Update after randomize
     });
+
+    if (this.undoButton) {
+      this.undoButton.addEventListener('click', () => {
+        this.gameManager.undoMove();
+        this.updateUndoButtonState(); // Update after undo attempt
+      });
+    }
 
     this.difficultySelect.addEventListener('change', (e) => {
       const newDifficulty = parseInt(e.target.value);
@@ -45,6 +66,7 @@ export class UIManager {
       this.hasStarted = true;
     }
     this.moveCounter.textContent = moves;
+    this.updateUndoButtonState(); // Update after a move
   }
 
   updateOptimalMoves(moves) {
@@ -56,5 +78,6 @@ export class UIManager {
     this.optimalMoves.textContent = this.gameManager.optimalMoves;
     this.timer.reset();
     this.hasStarted = false;
+    this.updateUndoButtonState(); // Update after UI reset (e.g. new game from difficulty change)
   }
 }

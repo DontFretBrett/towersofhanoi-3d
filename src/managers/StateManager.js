@@ -8,6 +8,27 @@ export class StateManager {
       difficulty: 3
     };
     this.listeners = new Set();
+    this.history = [];
+  }
+
+  pushState(gameState) {
+    // Ensure we're storing a copy, not a reference
+    this.history.push(JSON.parse(JSON.stringify(gameState)));
+  }
+
+  popState() {
+    if (this.history.length <= 1) {
+      return null;
+    }
+    return this.history.pop();
+  }
+
+  clearHistory() {
+    this.history = [];
+  }
+
+  getHistoryLength() {
+    return this.history.length;
   }
 
   setState(newState) {
