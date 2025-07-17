@@ -1,0 +1,34 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    # Group related updates together to reduce noise
+    groups:
+      # Group all Three.js related packages
+      threejs:
+        patterns:
+          - "three*"
+      # Group all development dependencies
+      dev-dependencies:
+        dependency-type: "development"
+      # Group all build tools
+      build-tools:
+        patterns:
+          - "vite*"
+          - "jest*"
+          - "@vite*"
+    # Allow both direct and indirect updates
+    open-pull-requests-limit: 10
+    # Add labels to pull requests
+    labels:
+      - "dependencies"
+      - "dependabot"
+    # Set commit message prefix
+    commit-message:
+      prefix: "deps"
+      include: "scope" 
