@@ -14,8 +14,8 @@
     "three": "^0.178.0"
   },
   "devDependencies": {
-    "jest": "^30.0.4",
-    "vite": "^7.0.5"
+    "jest": "^30.0.5",
+    "vite": "^7.0.6"
   },
   "browserslist": [
     ">0.2%",
