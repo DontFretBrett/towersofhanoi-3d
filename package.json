@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "jest": "^30.0.5",
-    "vite": "^7.0.6"
+    "vite": "^7.1.1"
   },
   "browserslist": [
     ">0.2%",
