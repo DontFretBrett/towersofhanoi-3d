@@ -11,7 +11,7 @@
   "dependencies": {
     "dat.gui": "^0.7.9",
     "gsap": "^3.13.0",
-    "three": "^0.181.2"
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "jest": "^30.2.0",
