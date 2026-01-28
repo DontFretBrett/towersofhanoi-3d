@@ -7,23 +7,13 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-    # Group related updates together to reduce noise
+    # Group all dependency updates into a single PR
     groups:
-      # Group all Three.js related packages
-      threejs:
+      all-dependencies:
         patterns:
-          - "three*"
-      # Group all development dependencies
-      dev-dependencies:
-        dependency-type: "development"
-      # Group all build tools
-      build-tools:
-        patterns:
-          - "vite*"
-          - "jest*"
-          - "@vite*"
-    # Allow both direct and indirect updates
-    open-pull-requests-limit: 10
+          - "*"
+    # Single PR for all updates (grouped above)
+    open-pull-requests-limit: 1
     # Add labels to pull requests
     labels:
       - "dependencies"
